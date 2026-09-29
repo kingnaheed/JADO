@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f6f2" />
+    <meta name="description" content="Meet someone new, or drop into a live room on JADO." />
+    <title>JADO — Meet your kind of people</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="wordmark" href="#discover" aria-label="JADO home">ja<span>do</span><i>.</i></a>
+        <div class="sidebar-label">YOUR SPACE</div>
+        <nav class="nav-list">
+          <button class="nav-item is-active" data-view="discover" aria-current="page">
+            <span class="nav-icon">⌕</span><span>Discover</span>
+          </button>
+          <button class="nav-item" data-view="live">
+            <span class="nav-icon nav-live-icon">◉</span><span>Live rooms</span><span class="nav-count">8</span>
+          </button>
+          <button class="nav-item" data-view="matches">
+            <span class="nav-icon">♡</span><span>Matches</span><span class="nav-count match-count">0</span>
+          </button>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="profile-mini">
+            <div class="mini-avatar">A</div>
+            <div><strong>Alex Morgan</strong><span>Your profile</span></div>
+            <span class="more-icon">···</span>
+          </div>
+          <p class="sidebar-note">Good connections<br />start with being here.</p>
+          <span class="sidebar-spark" aria-hidden="true">✳</span>
+        </div>
+      </aside>
+
+      <main class="main-area">
+        <header class="topbar">
+          <div class="mobile-brand">jado<i>.</i></div>
+          <div class="topbar-title"><span class="online-dot"></span> A little more human</div>
+          <div class="topbar-actions">
+            <button class="icon-button notification-button" aria-label="Notifications" title="Notifications">♧<span></span></button>
+            <button class="avatar-button" aria-label="Your profile">A</button>
+          </div>
+        </header>
+
+        <section class="view-panel is-visible" id="discover-view" aria-labelledby="discover-title">
+          <div class="section-heading discover-heading">
+            <div>
+              <div class="eyebrow">MONDAY, OCTOBER 14 <span>·</span> BROOKLYN, NY</div>
+              <h1 id="discover-title">Someone worth<br /><em>meeting.</em></h1>
+            </div>
+            <button class="filter-button" id="filter-button"><span>☷</span> Filters <b>2</b></button>
+          </div>
+          <div class="discover-layout">
+            <div class="profile-column">
+              <div class="profile-feed" id="profile-feed" aria-label="Discover profiles"></div>
+            </div>
+            <aside class="right-rail">
+              <div class="rail-heading"><div><span class="eyebrow">A GOOD PLACE TO START</span><h2>Your kind of people</h2></div><span class="tiny-arrow">↗</span></div>
+              <div class="suggestion-list" id="suggestion-list"></div>
+              <div class="rail-divider"></div>
+              <div class="prompt-card"><span class="prompt-mark">“</span><p>What’s a small thing that always makes your day better?</p><button id="prompt-button">Use this opener <span>↗</span></button></div>
+              <div class="live-teaser"><div class="teaser-art"><span class="teaser-orbit">✳</span><span class="teaser-live"><i></i> LIVE NOW</span></div><div class="teaser-copy"><span class="eyebrow">SAY HI IN REAL TIME</span><strong>Good people, live.</strong><button data-view="live">Explore live rooms <span>→</span></button></div></div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="view-panel" id="live-view" aria-labelledby="live-title" hidden>
+          <div class="section-heading live-heading">
+            <div><div class="eyebrow"><span class="live-pulse"></span> PEOPLE, RIGHT NOW</div><h1 id="live-title">Live looks<br /><em>good on you.</em></h1></div>
+            <button class="go-live-button" id="go-live-button"><span>◉</span> Go live</button>
+          </div>
+          <div class="live-filters"><button class="live-filter is-selected">For you</button><button class="live-filter">Near you</button><button class="live-filter">Music</button><button class="live-filter">After work</button></div>
+          <div class="room-grid" id="room-grid"></div>
+          <p class="demo-notice">Sample rooms for the prototype. Joining a room opens a local preview; it does not connect to a broadcaster.</p>
+        </section>
+
+        <section class="view-panel" id="matches-view" aria-labelledby="matches-title" hidden>
+          <div class="section-heading matches-heading"><div><div class="eyebrow">THE START OF SOMETHING</div><h1 id="matches-title">Your people<br /><em>are here.</em></h1></div></div>
+          <div class="matches-toolbar"><p><strong id="matches-total">0</strong> mutual connections</p><span>Newest first</span></div>
+          <div id="matches-list" class="matches-list"></div>
+          <div id="empty-matches" class="empty-state"><span>♡</span><h2>Your next good conversation<br />is still out there.</h2><p>Send a like in Discover. When it’s mutual, you’ll find them here.</p><button data-view="discover">Meet someone <span>→</span></button></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog class="camera-dialog" id="camera-dialog">
+      <form method="dialog"><button class="dialog-close" aria-label="Close">×</button></form>
+      <div class="camera-content"><div class="eyebrow">YOUR MOMENT, YOUR WAY</div><h2 id="camera-title">Go live.</h2><p id="camera-message">Check your camera and get comfortable. You can end your preview at any time.</p><div class="camera-frame"><video id="camera-video" autoplay muted playsinline></video><div id="camera-placeholder" class="camera-placeholder"><span>◉</span><p>Your camera preview will show here</p></div></div><div class="camera-controls"><button id="camera-toggle" class="camera-toggle">Turn on camera</button><button id="camera-end" class="camera-end" disabled>End preview</button></div><p class="camera-disclaimer">This prototype only shows your camera on this device. It does not broadcast to other people.</p></div>
+    </dialog>
+  </body>
+</html>
