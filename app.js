@@ -67,16 +67,119 @@ function saveProfiles(key, items) {
   }
 }
 
+const reels = [
+  { name: "Sophie", age: 24, image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80", tag: "sunset walk", likes: "24.8K" },
+  { name: "Ariya", age: 27, image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80", tag: "city glow", likes: "18.3K" },
+  { name: "Lena", age: 26, image: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80", tag: "coffee date", likes: "31.1K" },
+  { name: "Mila", age: 29, image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=900&q=80", tag: "weekend mood", likes: "12.9K" },
+  { name: "Nia", age: 25, image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=900&q=80", tag: "good energy", likes: "26.4K" }
+];
+
 const state = { profileIndex: 0, matches: loadProfiles(storageKeys.matches), saved: loadProfiles(storageKeys.saved), toastTimer: null, cameraStream: null, profileObserver: null };
+const authStorage = { flag: "jado.loggedIn", email: "jado.email", role: "jado.role" };
 const elements = {
-  profileFeed: document.querySelector("#profile-feed"), suggestionList: document.querySelector("#suggestion-list"),
-  matchCount: document.querySelector(".match-count"), matchesTotal: document.querySelector("#matches-total"),
+  appShell: document.querySelector("#app-shell"), authScreen: document.querySelector("#auth-screen"),
+  loginForm: document.querySelector("#login-form"), loginEmail: document.querySelector("#login-email"),
+  loginPassword: document.querySelector("#login-password"), loginError: document.querySelector("#login-error"),
+  demoLogin: document.querySelector("#demo-login"), profileFeed: document.querySelector("#profile-feed"), suggestionList: document.querySelector("#suggestion-list"),
+  reelsGrid: document.querySelector("#reels-grid"), matchCount: document.querySelector(".match-count"), matchesTotal: document.querySelector("#matches-total"),
   matchesList: document.querySelector("#matches-list"), emptyMatches: document.querySelector("#empty-matches"),
   toast: document.querySelector("#toast"), roomGrid: document.querySelector("#room-grid"),
   cameraDialog: document.querySelector("#camera-dialog"), cameraVideo: document.querySelector("#camera-video"),
   cameraPlaceholder: document.querySelector("#camera-placeholder"), cameraToggle: document.querySelector("#camera-toggle"),
-  cameraEnd: document.querySelector("#camera-end")
+  cameraEnd: document.querySelector("#camera-end"), roleBadge: document.querySelector("#role-badge"),
+  logoutButton: document.querySelector("#logout-button")
 };
+
+function syncAuthView() {
+  const isLoggedIn = localStorage.getItem(authStorage.flag) === "true";
+  const role = localStorage.getItem(authStorage.role) || "user";
+  const profileName = document.querySelector(".profile-mini strong");
+  const profileMeta = document.querySelector(".profile-mini span");
+
+  elements.appShell.hidden = !isLoggedIn;
+  elements.authScreen.hidden = isLoggedIn;
+
+  if (elements.roleBadge) {
+    elements.roleBadge.textContent = role === "host" ? "Host" : "User";
+    elements.roleBadge.classList.toggle("is-host", role === "host");
+  }
+
+  if (isLoggedIn) {
+    document.body.classList.add("is-authenticated");
+    const savedEmail = localStorage.getItem(authStorage.email) || "friend";
+    const displayName = savedEmail.split("@")[0] || "Alex Morgan";
+    profileName.textContent = displayName;
+    profileMeta.textContent = role === "host" ? "Host profile" : "Your profile";
+
+    const discoverPanel = document.querySelector("#discover-view");
+    if (discoverPanel) {
+      requestAnimationFrame(() => {
+        discoverPanel.scrollTo({ top: 0, behavior: "auto" });
+        discoverPanel.querySelector(".reels-section")?.scrollIntoView({ behavior: "auto", block: "start" });
+      });
+    }
+  } else {
+    document.body.classList.remove("is-authenticated");
+    if (profileName && profileMeta) {
+      profileName.textContent = "Alex Morgan";
+      profileMeta.textContent = "Your profile";
+    }
+    if (elements.roleBadge) {
+      elements.roleBadge.textContent = "User";
+      elements.roleBadge.classList.remove("is-host");
+    }
+  }
+}
+
+function showLoginError(message) {
+  elements.loginError.textContent = message;
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+
+  const email = elements.loginEmail.value.trim();
+  const password = elements.loginPassword.value.trim();
+  const role = document.querySelector('input[name="role"]:checked')?.value || "user";
+
+  if (!email || !password) {
+    showLoginError("Email and password are required to continue.");
+    return;
+  }
+
+  if (password.length < 6) {
+    showLoginError("Password must be at least 6 characters long.");
+    return;
+  }
+
+  localStorage.setItem(authStorage.flag, "true");
+  localStorage.setItem(authStorage.email, email);
+  localStorage.setItem(authStorage.role, role);
+  showLoginError("");
+  syncAuthView();
+  showToast(`Welcome back, ${email.split("@")[0]}! You are signed in as ${role === "host" ? "Host" : "User"}.`);
+}
+
+function handleDemoLogin() {
+  elements.loginEmail.value = "alex@jado.app";
+  elements.loginPassword.value = "jado123";
+  const userOption = document.querySelector('input[name="role"][value="user"]');
+  if (userOption) {
+    userOption.checked = true;
+  }
+  handleLogin(new Event("submit", { bubbles: true, cancelable: true }));
+}
+
+function handleLogout() {
+  localStorage.removeItem(authStorage.flag);
+  localStorage.removeItem(authStorage.email);
+  localStorage.removeItem(authStorage.role);
+  syncAuthView();
+  elements.loginEmail.value = "";
+  elements.loginPassword.value = "";
+  showLoginError("");
+}
 
 function renderProfile() {
   elements.profileFeed.replaceChildren(...profiles.map((profile, index) => {
@@ -116,6 +219,27 @@ function renderSuggestions() {
   }));
 }
 
+function renderReels() {
+  elements.reelsGrid.replaceChildren(...reels.map((reel) => {
+    const card = document.createElement("article");
+    card.className = "reel-card";
+    card.innerHTML = `
+      <div class="reel-media" style="background-image: url('${reel.image}')">
+        <span class="reel-badge">Reel</span>
+        <button class="reel-like" aria-label="Like ${reel.name}">♥</button>
+      </div>
+      <div class="reel-info">
+        <div>
+          <strong>${reel.name}, ${reel.age}</strong>
+          <span>${reel.tag}</span>
+        </div>
+        <small>${reel.likes}</small>
+      </div>
+    `;
+    return card;
+  }));
+}
+
 function renderMatches() {
   elements.matchCount.textContent = state.matches.length;
   elements.matchesTotal.textContent = state.matches.length;
@@ -129,8 +253,12 @@ function renderMatches() {
   }));
 }
 
+function getSelectedLiveFilter() {
+  return document.querySelector(".live-filter.is-selected")?.textContent.trim() || "For you";
+}
+
 function renderRooms() {
-  const selectedFilter = document.querySelector(".live-filter.is-selected")?.textContent.toLowerCase();
+  const selectedFilter = getSelectedLiveFilter().toLowerCase();
   const visibleRooms = rooms.filter((room) => selectedFilter === "for you"
     || (selectedFilter === "near you" && room.near)
     || room.category === selectedFilter);
@@ -138,7 +266,7 @@ function renderRooms() {
     const card = document.createElement("article");
     card.className = `room-card room-${room.color}`;
     card.innerHTML = `<div class="room-cover" style="--room-image:url('https://images.unsplash.com/${room.image}?auto=format&fit=crop&w=760&q=80')"><span class="room-live"><i></i> LIVE</span><span class="room-viewers">◉ ${room.viewers}</span><span class="room-stamp">✳</span></div><div class="room-info"><span class="eyebrow">${room.topic}</span><h2>${room.name}</h2><p>${room.host}</p><button class="join-room" data-room="${index}">Join room <span>↗</span></button></div>`;
-    card.querySelector(".join-room").addEventListener("click", () => openCamera(room.name));
+    card.querySelector(".join-room").addEventListener("click", () => openCamera(room.name, getSelectedLiveFilter()));
     return card;
   }));
 }
@@ -229,8 +357,19 @@ document.querySelectorAll(".live-filter").forEach((button) => button.addEventLis
   renderRooms();
 }));
 
-async function openCamera(roomName = "") {
-  document.querySelector("#camera-title").textContent = roomName ? `Join ${roomName}.` : "Go live.";
+elements.loginForm.addEventListener("submit", handleLogin);
+elements.demoLogin.addEventListener("click", handleDemoLogin);
+elements.logoutButton?.addEventListener("click", handleLogout);
+
+async function openCamera(roomName = "", filterName = "") {
+  const title = roomName ? `Join ${roomName}.` : "Go live.";
+  const selectedFilter = filterName || getSelectedLiveFilter();
+  const label = selectedFilter && selectedFilter !== "For you" ? ` · ${selectedFilter}` : "";
+
+  document.querySelector("#camera-title").textContent = `${title}${label}`;
+  document.querySelector("#camera-message").textContent = roomName
+    ? `You are joining this room using the ${selectedFilter} filter.`
+    : `Host stream is starting with the ${selectedFilter} filter.`;
   elements.cameraDialog.showModal();
 }
 
@@ -264,12 +403,14 @@ function stopCamera() {
   elements.cameraEnd.disabled = true;
 }
 
-document.querySelector("#go-live-button").addEventListener("click", () => openCamera());
+document.querySelector("#go-live-button").addEventListener("click", () => openCamera("", getSelectedLiveFilter()));
 elements.cameraToggle.addEventListener("click", startCamera);
 elements.cameraEnd.addEventListener("click", stopCamera);
 elements.cameraDialog.addEventListener("close", stopCamera);
 
+syncAuthView();
 renderProfile();
 renderSuggestions();
+renderReels();
 renderMatches();
 renderRooms();

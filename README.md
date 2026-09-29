@@ -21,6 +21,18 @@ HTML, CSS, and browser JavaScript.
 You can also use `npx serve .` if Python is not installed. Camera access needs a
 secure context, so use `localhost` (or HTTPS), not a plain network address.
 
+## Build the Android APK
+
+Install Node.js, JDK 21, and Android Studio with the Android SDK (API 36).
+Then run:
+
+```bash
+npm install
+npm run android:build
+```
+
+The debug APK is created at `android/app/build/outputs/apk/debug/app-debug.apk`.
+
 ## What this prototype does not do
 
 Profiles and rooms are sample data. Keeps and mutual matches are stored locally

@@ -13,7 +13,46 @@
     <script src="app.js" defer></script>
   </head>
   <body>
-    <div class="app-shell">
+    <div class="auth-screen" id="auth-screen">
+      <div class="auth-panel">
+        <div class="auth-badge">Welcome back</div>
+        <h1>Log in to JADO</h1>
+        <p>Meet new people, join rooms, and keep the good conversations going.</p>
+
+        <form id="login-form" class="login-form" novalidate>
+          <label>
+            <span>Email</span>
+            <input id="login-email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+          </label>
+
+          <label>
+            <span>Password</span>
+            <input id="login-password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
+          </label>
+
+          <div class="role-picker" aria-label="Account type">
+            <span>Account type</span>
+            <div class="role-options">
+              <label class="role-option">
+                <input type="radio" name="role" value="user" checked />
+                <span>User</span>
+              </label>
+              <label class="role-option">
+                <input type="radio" name="role" value="host" />
+                <span>Host</span>
+              </label>
+            </div>
+          </div>
+
+          <p id="login-error" class="login-error" aria-live="polite"></p>
+
+          <button type="submit" class="login-button">Continue</button>
+          <button type="button" class="demo-button" id="demo-login">Use demo account</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="app-shell" id="app-shell" hidden>
       <aside class="sidebar" aria-label="Main navigation">
         <a class="wordmark" href="#discover" aria-label="JADO home">ja<span>do</span><i>.</i></a>
         <div class="sidebar-label">YOUR SPACE</div>
@@ -32,7 +71,10 @@
           <div class="profile-mini">
             <div class="mini-avatar">A</div>
             <div><strong>Alex Morgan</strong><span>Your profile</span></div>
-            <span class="more-icon">···</span>
+            <div class="profile-mini-actions">
+              <span class="role-badge" id="role-badge">User</span>
+              <button class="logout-button" id="logout-button" type="button" aria-label="Log out">Log out</button>
+            </div>
           </div>
           <p class="sidebar-note">Good connections<br />start with being here.</p>
           <span class="sidebar-spark" aria-hidden="true">✳</span>
@@ -57,6 +99,18 @@
             </div>
             <button class="filter-button" id="filter-button"><span>☷</span> Filters <b>2</b></button>
           </div>
+
+          <div class="reels-section">
+            <div class="reels-head">
+              <div>
+                <span class="eyebrow">VIDEO FEED</span>
+                <h2>Reels</h2>
+              </div>
+              <button class="reels-see-all">See all</button>
+            </div>
+            <div class="reels-grid" id="reels-grid" aria-label="Featured reels"></div>
+          </div>
+
           <div class="discover-layout">
             <div class="profile-column">
               <div class="profile-feed" id="profile-feed" aria-label="Discover profiles"></div>
